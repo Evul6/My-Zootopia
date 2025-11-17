@@ -1,12 +1,47 @@
+"""
+Animals Web Generator
+
+This script generates an HTML page displaying animal information from a JSON file.
+It reads animal data, generates HTML cards for each animal, and inserts them into
+a template to create a complete HTML page.
+
+Dependencies:
+    - Python 3.x
+    - JSON file containing animal data (animals_data.json)
+    - HTML template file (animals_template.html)
+
+Usage:
+    python animals_web_generator.py
+
+Output:
+    Generates or updates animals.html with the formatted animal information.
+"""
+
 import json
 
 def load_data(file_path):
-    """Loads a JSON file"""
+    """
+    Load and parse a JSON file.
+
+    Args:
+        file_path (str): Path to the JSON file to load.
+
+    Returns:
+        dict or list: The parsed JSON data.
+    """
     with open(file_path, "r", encoding='utf-8') as handle:
         return json.load(handle)
 
 def generate_animal_cards(animals):
-    """Generate HTML cards for each animal"""
+    """
+    Generate HTML cards for each animal in the provided list.
+
+    Args:
+        animals (list): List of dictionaries containing animal data.
+
+    Returns:
+        str: A string containing HTML for all animal cards.
+    """
     cards_html = []
     
     for animal in animals:
@@ -25,7 +60,6 @@ def generate_animal_cards(animals):
         # Add diet if available
         if 'diet' in characteristics:
             card += f'<p><strong>Diet:</strong> {characteristics["diet"]}</p>\n'
-            
         # Add first location if available
         if locations:
             card += f'<p><strong>Location:</strong> {locations[0]}</p>\n'
@@ -40,6 +74,13 @@ def generate_animal_cards(animals):
     return '\n'.join(cards_html)
 
 def generate_html():
+    """
+    Main function to generate the HTML page with animal information.
+    
+    This function coordinates the process of loading data, generating HTML content,
+    and writing the final output to a file. It handles various error cases and
+    provides appropriate feedback.
+    """
     try:
         # Load data
         animals = load_data('animals_data.json')
