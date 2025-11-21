@@ -32,6 +32,44 @@ def load_data(file_path):
     with open(file_path, "r", encoding='utf-8') as handle:
         return json.load(handle)
 
+def serialize_animal(animal):
+    """
+    Serialize a single animal dictionary to HTML.
+    
+    Args:
+        animal (dict): A dictionary containing animal information.
+        
+    Returns:
+        str: HTML string representing the animal card.
+    """
+    if not isinstance(animal, dict):
+        return ''
+        
+    characteristics = animal.get('characteristics', {}) or {}
+    locations = animal.get('locations', []) or []
+    type_key = next((k for k in characteristics if k.lower() == 'type'), None)
+    
+    # Create card HTML
+    card = f'''
+    <li class="cards__item">
+        <h2 class="card__title">{animal.get('name', 'Unnamed Animal')}</h2>
+        <div class="card__text">
+    '''
+    
+    # Add diet if available
+    if 'diet' in characteristics and characteristics['diet']:
+        card += f'<p><strong>Diet:</strong> {characteristics["diet"]}</p>\n'
+    # Add first location if available
+    if locations and isinstance(locations, (list, tuple)) and len(locations) > 0:
+        card += f'<p><strong>Location:</strong> {locations[0]}</p>\n'
+    # Add type if available
+    if type_key and characteristics.get(type_key):
+        card += f'<p><strong>Type:</strong> {characteristics[type_key]}</p>\n'
+    card += '''        </div>
+    </li>'''
+    
+    return card
+
 def generate_animal_cards(animals):
     """
     Generate HTML cards for each animal in the provided list.
@@ -42,43 +80,16 @@ def generate_animal_cards(animals):
     Returns:
         str: A string containing HTML for all animal cards.
     """
-    cards_html = []
-    
+    if not animals:
+        return ''
+        
     # Convert single animal to a list if it's not already one
     if not isinstance(animals, list):
         animals = [animals]
     
-    for animal in animals:
-        if not isinstance(animal, dict):
-            continue
-            
-        characteristics = animal.get('characteristics', {}) or {}
-        locations = animal.get('locations', []) or []
-        type_key = next((k for k in characteristics if k.lower() == 'type'), None)
-        
-        # Create card HTML
-        card = f'''
-        <li class="cards__item">
-            <h2 class="card__title">{animal.get('name', 'Unnamed Animal')}</h2>
-            <div class="card__text">
-        '''
-        
-        # Add diet if available
-        if 'diet' in characteristics and characteristics['diet']:
-            card += f'<p><strong>Diet:</strong> {characteristics["diet"]}</p>\n'
-        # Add first location if available
-        if locations and isinstance(locations, (list, tuple)) and len(locations) > 0:
-            card += f'<p><strong>Location:</strong> {locations[0]}</p>\n'
-        # Add type if available
-        if type_key and characteristics.get(type_key):
-            card += f'<p><strong>Type:</strong> {characteristics[type_key]}</p>\n'
-        card += '''            </div>
-        </li>'''
-        
-        cards_html.append(card)
-    print(cards_html)
+    cards_html = [serialize_animal(animal) for animal in animals if isinstance(animal, dict)]
     return '\n'.join(cards_html)
-def generate_html():
+def main():
     """
     Main function to generate the HTML page with animal information.
     
@@ -95,7 +106,7 @@ def generate_html():
         
         # Generate animal cards HTML
         animals_html = generate_animal_cards(animals)
-        print(f"Generated HTML for animals")
+        print("Generated HTML for animals")
         
         # Read template
         with open('animals_template.html', 'r', encoding='utf-8') as file:
@@ -109,13 +120,17 @@ def generate_html():
             file.write(output_html)
         
         print("Successfully generated animals.html")
+        return 0
         
     except FileNotFoundError as e:
         print(f"Error: File not found - {e}")
+        return 1
     except json.JSONDecodeError:
         print("Error: Invalid JSON format in animals_data.json")
+        return 1
     except Exception as e:
         print(f"An error occurred: {e}")
+        return 1
 
 if __name__ == "__main__":
-    generate_html()
+    main()
